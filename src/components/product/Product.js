@@ -14,7 +14,6 @@ const Product = ({ getProduct, product, updateProduct }) => {
 
   const [showFormModal, setShowFormModal] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
     quantity: 0,
     totalPrice: 0,
   });
@@ -55,23 +54,20 @@ const Product = ({ getProduct, product, updateProduct }) => {
 
     try {
       const orderRequest = {
-        email: formData.email,
         productId: productId,
         qty: formData.quantity,
         price: formData.totalPrice,
       };
 
-      const response = await api.post("/api/v1/order", orderRequest);
+      const response = await api.post("/api/v1/order", orderRequest, { withCredentials: true });
 
       if (response.status === 201) {
         setFormData({
-          email: "",
           quantity: 0,
           totalPrice: 0,
         });
         setShowFormModal(false);
         alert("Product added to cart!");
-        // Optionally update product stock or cart UI here
       }
     } catch (error) {
       console.error("Error adding product to cart:", error);
@@ -115,17 +111,6 @@ const Product = ({ getProduct, product, updateProduct }) => {
                 </Modal.Header>
                 <Modal.Body>
                   <Form onSubmit={handleFormSubmit}>
-                    <Form.Group controlId="formBasicEmail">
-                      <Form.Label>Email address</Form.Label>
-                      <Form.Control
-                        type="email"
-                        placeholder="Enter email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </Form.Group>
                     <Form.Group controlId="formBasicQuantity">
                       <Form.Label>
                         Quantity ({product.qty} available)

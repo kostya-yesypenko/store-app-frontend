@@ -5,8 +5,8 @@ import api from "../../api/axiosConfig";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [login, setLogin] = useState("");
-  const [password, setPassword] = useState("");
+  const [login, setLogin] = useState("kostia");
+  const [password, setPassword] = useState("1");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -15,14 +15,14 @@ const Login = () => {
       const response = await api.post("/auth/login", {
         login: login,
         password: password,
-      });
+      }, { withCredentials: true });
   
       if (response.status === 200) {
         const user = response.data;
         console.log('Login successful:', user);
         setLogin("");
         setPassword("");
-  
+        localStorage.setItem("user", JSON.stringify(user))
         // Store user information in Local Storage or Session Storage
         navigate('/home');
       } else {

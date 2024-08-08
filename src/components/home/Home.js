@@ -99,7 +99,7 @@ const Home = ({ products, getProductsByCategory, categories, getProducts }) => {
                       Available: <span className="fw-bold">{product.qty}</span>
                     </p>
                     <Link to={`/product/${product.id}`}>
-                      <Button variant="info">More</Button>
+                      <Button variant="info">View</Button>
                     </Link>
                   </div>
                 </div>
