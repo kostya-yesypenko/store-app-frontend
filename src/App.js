@@ -11,7 +11,7 @@ import Cart from "./components/cart/Cart";
 function App() {
   const [products, setProducts] = useState();
   const [product, setProduct] = useState();
-
+  const [cart, setCart] = useState({ orders: [] }); // Add cart state
   const [categories, setCategories] = useState();
 
   const updateProduct = (updatedProduct) => {
@@ -21,7 +21,6 @@ function App() {
   const getCategories = async () => {
     try {
       const response = await api.get(`/api/v1/categories`);
-
       setCategories(response.data);
     } catch (err) {
       console.log(err);
@@ -31,19 +30,17 @@ function App() {
   const getProducts = async () => {
     try {
       const response = await api.get(`/api/v1/products`);
-
       setProducts(response.data);
     } catch (err) {
       console.log(err);
     }
   };
+  
 
   const getProduct = async (id) => {
     try {
       const response = await api.get(`/api/v1/products/${id}`);
-
       const singleProduct = response.data;
-
       setProduct(singleProduct);
     } catch (error) {
       console.error(error);
@@ -54,15 +51,24 @@ function App() {
     try {
       const response = await api.get(`/api/v1/category/${categoryId}`);
       setProducts(response.data);
-      // Navigate to the /home route after setting the products
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  const getCart = async () => {
+    try {
+      const response = await api.get(`/api/v1/cart`, { withCredentials: true });
+      setCart(response.data);
+    } catch (error) {
+      console.error("Error fetching cart data:", error);
     }
   };
 
   useEffect(() => {
     getProducts();
     getCategories();
+    getCart(); // Fetch the cart data when the app loads
   }, []);
 
   return (
@@ -80,6 +86,7 @@ function App() {
                   getProductsByCategory={getProductsByCategory}
                   categories={categories}
                   getProducts={getProducts}
+                  getCart={getCart} // Pass getCart to Home
                 />
               </div>
             }
@@ -114,7 +121,7 @@ function App() {
             element={
               <>
                 <Header />
-                <Cart />
+                <Cart cart={cart} getCart={getCart} /> {/* Pass cart and getCart */}
               </>
             }
           />

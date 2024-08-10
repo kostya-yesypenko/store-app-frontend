@@ -3,13 +3,20 @@ import { Button, NavDropdown } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import api from "../../api/axiosConfig";
 
-const Home = ({ products, getProductsByCategory, categories, getProducts }) => {
+const Home = ({
+  products,
+  getProductsByCategory,
+  categories,
+  getProducts,
+  getCart,
+}) => {
+  // Accept getCart as a prop
   const [currentCategoryId, setCurrentCategoryId] = useState(null);
   const [chosenCategoryName, setChosenCategoryName] = useState(null);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
@@ -27,24 +34,45 @@ const Home = ({ products, getProductsByCategory, categories, getProducts }) => {
     getProducts();
   };
 
-  const handleDownloadExcel = async () => {
+  const handleAddToCart = async (product) => {
     try {
-      const response = await api.get('api/excel/download', { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${Date.now()}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
+      const order = {
+        productId: product.id,
+        qty: 1,
+        price: product.price,
+      };
+      await api.post("api/v1/order", order, { withCredentials: true });
+      alert("Product added to cart successfully!");
+
+      getCart(); // Refresh the cart after adding the item
+      
+      getProducts(); // Refresh the products to update availability if needed
     } catch (error) {
-      console.error('Error downloading Excel file:', error);
+      console.error("Error adding product to cart:", error);
+      alert("Failed to add product to cart.");
     }
   };
 
   if (!user) {
     return <div>Loading...</div>;
   }
+
+  const handleDownloadExcel = async () => {
+    try {
+      const response = await api.get("api/excel/download", {
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${Date.now()}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading Excel file:", error);
+    }
+  };
 
   return (
     <section>
@@ -86,7 +114,11 @@ const Home = ({ products, getProductsByCategory, categories, getProducts }) => {
                     src={product.img}
                     className="card-img-top img-fluid"
                     alt="Product"
-                    style={{ objectFit: "cover", width: "100%", height: "auto" }}
+                    style={{
+                      objectFit: "cover",
+                      width: "100%",
+                      height: "auto",
+                    }}
                   />
                 </div>
                 <div className="card-body">
@@ -98,9 +130,19 @@ const Home = ({ products, getProductsByCategory, categories, getProducts }) => {
                     <p className="text-muted mb-0">
                       Available: <span className="fw-bold">{product.qty}</span>
                     </p>
-                    <Link to={`/product/${product.id}`}>
-                      <Button variant="info">View</Button>
-                    </Link>
+                    <div>
+                      <Link to={`/product/${product.id}`}>
+                        <Button variant="info" className="me-2">
+                          View
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="primary"
+                        onClick={() => handleAddToCart(product)}
+                      >
+                        Add to Cart
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
